@@ -3,3 +3,11 @@ error[E0774]: `derive` may only be applied to structs, enums and unions
   |
 9 | #[derive(Item)]
   | ^^^^^^^^^^^^^^^
+
+warning: unused import: `dynomite_derive::Item`
+ --> $DIR/item-not-on-struct-fail.rs:1:5
+  |
+1 | use dynomite_derive::Item;
+  |     ^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
