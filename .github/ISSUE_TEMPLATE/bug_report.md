@@ -20,4 +20,3 @@ Describe your issue in detail.
 dynomite version:
 
 rustc version:
-

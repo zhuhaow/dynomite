@@ -1,19 +1,19 @@
 [package]
 name = "dynomite"
 version = "0.10.0"
-authors = ["softprops <d.tangren@gmail.com>"]
+authors = ["softprops <d.tangren@gmail.com>", "Alexander Zaitsev <zamazan4ik@tut.by>"]
 description = "Provides set of high-level productive DynamoDB interfaces"
 license = "MIT"
 keywords = ["dynamodb", "rusoto", "rusoto_dynamodb"]
 readme = "../README.md"
 documentation = "https://docs.rs/dynomite"
-homepage = "https://github.com/softprops/dynomite"
-repository = "https://github.com/softprops/dynomite"
+homepage = "https://github.com/rust-serverless/dynomite"
+repository = "https://github.com/rust-serverless/dynomite"
 edition = "2018"
 categories = ["database"]
 
 [badges]
-coveralls = { repository = "softprops/dynomite" }
+coveralls = { repository = "rust-serverless/dynomite" }
 maintenance = { status = "actively-developed" }
 
 [dependencies]

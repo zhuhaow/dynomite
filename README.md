@@ -11,17 +11,14 @@
 </p>
 
 <div align="center">
-  <a alt="GitHub Actions" href="https://github.com/softprops/dynomite/actions">
-    <img src="https://github.com/softprops/dynomite/workflows/Main/badge.svg"/>
+  <a alt="GitHub Actions" href="https://github.com/rust-serverless/dynomite/actions">
+    <img src="https://github.com/rust-serverless/dynomite/workflows/Main/badge.svg"/>
   </a>
   <a alt="crates.io" href="https://crates.io/crates/dynomite">
     <img src="https://img.shields.io/crates/v/dynomite.svg?logo=rust"/>
   </a>
-  <a alt="docs.rs" href="http://docs.rs/dynomite">
+  <a alt="docs.rs" href="https://docs.rs/dynomite">
     <img src="https://docs.rs/dynomite/badge.svg"/>
-  </a>
-  <a alt="latest docs" href="https://softprops.github.io/dynomite">
-   <img src="https://img.shields.io/badge/docs-latest-green.svg"/>
   </a>
   <a alt="license" href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-brightgreen.svg"/>
@@ -54,7 +51,7 @@ use std::collections::HashMap;
 use rusoto_dynamodb::AttributeValue;
 use uuid::Uuid;
 
-let mut item = HashMap.new();
+let mut item = HashMap::new();
 item.insert(
   "pk".to_string(), AttributeValue {
     s: Some(Uuid::new_v4().to_hyphenated().to_string()),
@@ -123,4 +120,4 @@ In another, run a rust binary with a client initialized like you see the the [lo
 
 * [How DynamoDB works](https://www.slideshare.net/AmazonWebServices/amazon-dynamodb-under-the-hood-how-we-built-a-hyperscale-database-dat321-aws-reinvent-2018)
 
-Doug Tangren (softprops) 2018-2020
+Doug Tangren ([softprops](https://github.com/softprops)) 2018-2020, Alexander Zaitsev ([zamazan4ik](https://github.com/zamazan4ik)) 2021
