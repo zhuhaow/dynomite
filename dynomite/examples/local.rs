@@ -1,3 +1,4 @@
+use aws_sdk_dynamodb::model::{KeyType, ScalarAttributeType};
 /// Assumes a you are running the following `dynamodb-local`
 /// on your host machine
 ///
@@ -5,16 +6,13 @@
 /// $ docker run -p 8000:8000 amazon/dynamodb-local
 /// ```
 use dynomite::{
-    attr_map,
     dynamodb::{
-        AttributeDefinition, CreateTableInput, DynamoDb, DynamoDbClient, GetItemInput,
-        KeySchemaElement, ProvisionedThroughput, PutItemInput, ScanInput,
+        model::{AttributeDefinition, KeySchemaElement, ProvisionedThroughput},
+        Client as DynamoDbClient,
     },
-    retry::Policy,
-    DynamoDbExt, Item, Retries,
+    Attribute, Item,
 };
-use futures::{future, TryStreamExt};
-use rusoto_core::Region;
+use maplit::hashmap;
 use std::{convert::TryFrom, error::Error};
 use uuid::Uuid;
 
@@ -31,29 +29,32 @@ pub struct Book {
 /// this may take a second or two to provision.
 /// it will fail if this table already exists but that's okay,
 /// this is just an example :)
-async fn bootstrap<D>(
-    client: &D,
+async fn bootstrap(
+    client: &DynamoDbClient,
     table_name: String,
-) where
-    D: DynamoDb,
-{
+) {
     let _ = client
-        .create_table(CreateTableInput {
-            table_name,
-            key_schema: vec![KeySchemaElement {
-                attribute_name: "Id".into(),
-                key_type: "HASH".into(),
-            }],
-            attribute_definitions: vec![AttributeDefinition {
-                attribute_name: "Id".into(),
-                attribute_type: "S".into(),
-            }],
-            provisioned_throughput: Some(ProvisionedThroughput {
-                read_capacity_units: 1,
-                write_capacity_units: 1,
-            }),
-            ..CreateTableInput::default()
-        })
+        .create_table()
+        .table_name(table_name)
+        .key_schema(
+            KeySchemaElement::builder()
+                .attribute_name("Id")
+                .key_type(KeyType::Hash)
+                .build(),
+        )
+        .attribute_definitions(
+            AttributeDefinition::builder()
+                .attribute_name("Id")
+                .attribute_type(ScalarAttributeType::S)
+                .build(),
+        )
+        .provisioned_throughput(
+            ProvisionedThroughput::builder()
+                .read_capacity_units(1)
+                .write_capacity_units(1)
+                .build(),
+        )
+        .send()
         .await;
 }
 
@@ -61,12 +62,9 @@ async fn bootstrap<D>(
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
-    // create rusoto client
-    let client = DynamoDbClient::new(Region::Custom {
-        name: "us-east-1".into(),
-        endpoint: "http://localhost:8000".into(),
-    })
-    .with_retries(Policy::default());
+    // create aws_sdk_dynamodb client
+    let shared_config = aws_config::load_from_env().await;
+    let client = DynamoDbClient::new(&shared_config);
 
     let table_name = "books".to_string();
 
@@ -85,27 +83,21 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!(
         "put_item() result {:#?}",
         client
-            .put_item(PutItemInput {
-                table_name: table_name.clone(),
-                item: book.clone().into(), // <= convert book into it's attribute map representation
-                ..PutItemInput::default()
-            })
+            .put_item()
+            .table_name(&table_name)
+            .set_item(Some(book.clone().into()))
+            .send()
             .await?
     );
 
     println!(
         "put_item() result {:#?}",
         client
-            .put_item(PutItemInput {
-                table_name: table_name.clone(),
-                // convert book into it's attribute map representation
-                item: Book {
-                    id: Uuid::new_v4(),
-                    title: "rust and beyond".into(),
-                }
-                .into(),
-                ..PutItemInput::default()
-            })
+            .put_item()
+            .table_name(&table_name)
+            .item("Id", Uuid::new_v4().to_string().into_attr())
+            .item("bookTitle", "rust and beyond".to_string().into_attr())
+            .send()
             .await?
     );
 
@@ -114,31 +106,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "scan result {:#?}",
         client
             .clone()
-            .scan_pages(ScanInput {
-                limit: Some(1), // to demonstrate we're getting through more than one page
-                table_name: table_name.clone(),
-                filter_expression: Some("bookTitle = :title".into()),
-                expression_attribute_values: Some(attr_map!(
-                    ":title" => "rust".to_string()
-                )),
-                ..ScanInput::default()
-            })
-            .try_for_each(|item| {
-                println!("stream_scan() item {:#?}", Book::try_from(item));
-                future::ready(Ok(()))
-            })
-            .await? // attempt to convert a attribute map to a book type
+            .scan()
+            .table_name(&table_name)
+            .filter_expression("bookTitle = :title")
+            .set_expression_attribute_values(Some(hashmap!(
+                ":title".to_string() => "rust".to_string().into_attr()
+            )))
+            .send()
+            .await?
     );
 
     // get the "rust' book by the Book type's generated key
     println!(
         "get_item() result {:#?}",
         client
-            .get_item(GetItemInput {
-                table_name,
-                key: book.key(), // get a book by key
-                ..GetItemInput::default()
-            })
+            .get_item()
+            .table_name(table_name)
+            .key("Id", book.id.to_string().into_attr())
+            .send()
             .await?
             .item
             .map(Book::try_from) // attempt to convert a attribute map to a book type
