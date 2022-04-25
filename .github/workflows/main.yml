@@ -1,17 +1,16 @@
-
 name: Main
 
 on:
   push:
     paths-ignore:
-      - '*.md'
+      - "*.md"
     branches:
       - master
     tags:
-      - '**'
+      - "**"
   pull_request:
     paths-ignore:
-      - '*.md'
+      - "*.md"
     branches:
       - master
 
@@ -22,34 +21,26 @@ jobs:
   codestyle:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v1
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
         with:
-          components: rustfmt
-          rust-version: nightly
-      - uses: actions/checkout@v2
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
       - run: cargo fmt --all -- --check
 
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v1
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
         with:
+          toolchain: stable
           components: clippy
-      - uses: actions/checkout@v2
+          override: true
+      - uses: Swatinem/rust-cache@v1
       - run: cargo clippy --all-targets -- -D clippy::all
 
-  compile:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v1
-      - uses: actions/checkout@v2
-      - run: cargo check --all
-
   test:
-    needs: [codestyle, lint, compile]
     strategy:
       matrix:
         rust: [stable, beta, nightly]
@@ -58,23 +49,25 @@ jobs:
     continue-on-error: ${{ matrix.rust != 'stable' }}
 
     steps:
-    - name: Setup Rust
-      uses: hecrj/setup-rust-action@v1
-      with:
-        rust-version: ${{ matrix.rust }}
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Test
-      run: cargo test
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - uses: Swatinem/rust-cache@v1
+      - name: Test
+        run: cargo test
 
   publish-docs:
     if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v1
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
       - name: Generate Docs
         run: |
           cargo doc --no-deps
@@ -90,9 +83,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test]
     steps:
-      - name: Set up Rust
-        uses: hecrj/setup-rust-action@v1
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v1
       - name: Publish
         run: |
           pushd dynomite-derive
