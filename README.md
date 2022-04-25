@@ -31,18 +31,17 @@
 
 Goals
 
-* ⚡ make writing [dynamodb](https://aws.amazon.com/dynamodb/) applications in [rust](https://www.rust-lang.org/) a productive experience
-* 🦀 exploit rust's type safety features
-* 👩‍💻 leverage existing work of the [rusoto](https://github.com/rusoto/rusoto) rust project
-* ☔ commitment to supporting applications built using stable rust
-* 📚 commitment to documentation
+- ⚡ make writing [dynamodb](https://aws.amazon.com/dynamodb/) applications in [rust](https://www.rust-lang.org/) a productive experience
+- 🦀 exploit rust's type safety features
+- 👩‍💻 leverage existing work of the [rusoto](https://github.com/rusoto/rusoto) rust project
+- ☔ commitment to supporting applications built using stable rust
+- 📚 commitment to documentation
 
 Features
 
-* 💌 less boilerplate
-* ♻️ automatic async pagination
-* 🕶️ client level retry interfaces for [robust error handling](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.Errors.html)
-
+- 💌 less boilerplate
+- ♻️ automatic async pagination
+- 🕶️ client level retry interfaces for [robust error handling](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.Errors.html)
 
 From this
 
@@ -54,7 +53,7 @@ use uuid::Uuid;
 let mut item = HashMap::new();
 item.insert(
   "pk".to_string(), AttributeValue {
-    s: Some(Uuid::new_v4().to_hyphenated().to_string()),
+    s: Some(Uuid::new_v4().as_hyphenated().to_string()),
     ..AttributeValue::default()
   }
 );
@@ -118,6 +117,6 @@ In another, run a rust binary with a client initialized like you see the the [lo
 
 ## Resources
 
-* [How DynamoDB works](https://www.slideshare.net/AmazonWebServices/amazon-dynamodb-under-the-hood-how-we-built-a-hyperscale-database-dat321-aws-reinvent-2018)
+- [How DynamoDB works](https://www.slideshare.net/AmazonWebServices/amazon-dynamodb-under-the-hood-how-we-built-a-hyperscale-database-dat321-aws-reinvent-2018)
 
 Doug Tangren ([softprops](https://github.com/softprops)) 2018-2020, Alexander Zaitsev ([zamazan4ik](https://github.com/zamazan4ik)) 2021
