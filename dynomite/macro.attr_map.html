@@ -4,7 +4,7 @@
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../dynomite/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
         </a><div class="sidebar-elems"><h2 class="location"><a href="index.html">In dynomite</a></h2><div id="sidebar-vars" data-name="attr_map" data-ty="macro" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../dynomite/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Macro <a href="index.html">dynomite</a>::<wbr><a class="macro" href="#">attr_map</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/dynomite/lib.rs.html#1030-1048">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><div class="example-wrap"><pre class="rust macro"><code><span class="macro">macro_rules!</span> <span class="ident">attr_map</span> {
+    <h1 class="fqn"><span class="in-band">Macro <a href="index.html">dynomite</a>::<wbr><a class="macro" href="#">attr_map</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/dynomite/lib.rs.html#982-1000">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><div class="example-wrap"><pre class="rust macro"><code><span class="macro">macro_rules!</span> <span class="ident">attr_map</span> {
     (@<span class="ident">single</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; { ... };
     (@<span class="ident">count</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) =&gt; { ... };
     ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">key</span>:<span class="ident">expr</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">value</span>:<span class="ident">expr</span>,)<span class="op">+</span>) =&gt; { ... };
@@ -17,21 +17,5 @@ where a map of this type is required.</p>
 <p>This syntax for this macro is the same as <a href="https://crates.io/crates/maplit">maplit</a>.</p>
 <p>A avoid using <code>&amp;str</code> slices for values when creating a mapping for a <code>String</code> <code>AttributeValue</code>.
 Instead use a <code>String</code>.</p>
-<h3 id="example"><a href="#example">Example</a></h3>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">dynomite::dynamodb::QueryInput</span>;
-<span class="kw">use</span> <span class="ident">dynomite::attr_map</span>;
-
-<span class="kw">let</span> <span class="ident">query</span> <span class="op">=</span> <span class="ident">QueryInput</span> {
-  <span class="ident">table_name</span>: <span class="string">&quot;some_table&quot;</span>.<span class="ident">into</span>(),
-  <span class="ident">key_condition_expression</span>: <span class="prelude-val">Some</span>(
-    <span class="string">&quot;partitionKeyName = :partitionkeyval&quot;</span>.<span class="ident">into</span>()
-  ),
-  <span class="ident">expression_attribute_values</span>: <span class="prelude-val">Some</span>(
-    <span class="macro">attr_map!</span> {
-       <span class="string">&quot;:partitionkeyval&quot;</span> =&gt; <span class="string">&quot;rust&quot;</span>.<span class="ident">to_string</span>()
-     }
-   ),
-   ..<span class="ident">QueryInput::default</span>()
-};</code></pre></div>
 </div></details></section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="dynomite" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>
 </body></html>

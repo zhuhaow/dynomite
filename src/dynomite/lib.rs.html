@@ -1355,71 +1355,6 @@
 <span id="1350">1350</span>
 <span id="1351">1351</span>
 <span id="1352">1352</span>
-<span id="1353">1353</span>
-<span id="1354">1354</span>
-<span id="1355">1355</span>
-<span id="1356">1356</span>
-<span id="1357">1357</span>
-<span id="1358">1358</span>
-<span id="1359">1359</span>
-<span id="1360">1360</span>
-<span id="1361">1361</span>
-<span id="1362">1362</span>
-<span id="1363">1363</span>
-<span id="1364">1364</span>
-<span id="1365">1365</span>
-<span id="1366">1366</span>
-<span id="1367">1367</span>
-<span id="1368">1368</span>
-<span id="1369">1369</span>
-<span id="1370">1370</span>
-<span id="1371">1371</span>
-<span id="1372">1372</span>
-<span id="1373">1373</span>
-<span id="1374">1374</span>
-<span id="1375">1375</span>
-<span id="1376">1376</span>
-<span id="1377">1377</span>
-<span id="1378">1378</span>
-<span id="1379">1379</span>
-<span id="1380">1380</span>
-<span id="1381">1381</span>
-<span id="1382">1382</span>
-<span id="1383">1383</span>
-<span id="1384">1384</span>
-<span id="1385">1385</span>
-<span id="1386">1386</span>
-<span id="1387">1387</span>
-<span id="1388">1388</span>
-<span id="1389">1389</span>
-<span id="1390">1390</span>
-<span id="1391">1391</span>
-<span id="1392">1392</span>
-<span id="1393">1393</span>
-<span id="1394">1394</span>
-<span id="1395">1395</span>
-<span id="1396">1396</span>
-<span id="1397">1397</span>
-<span id="1398">1398</span>
-<span id="1399">1399</span>
-<span id="1400">1400</span>
-<span id="1401">1401</span>
-<span id="1402">1402</span>
-<span id="1403">1403</span>
-<span id="1404">1404</span>
-<span id="1405">1405</span>
-<span id="1406">1406</span>
-<span id="1407">1407</span>
-<span id="1408">1408</span>
-<span id="1409">1409</span>
-<span id="1410">1410</span>
-<span id="1411">1411</span>
-<span id="1412">1412</span>
-<span id="1413">1413</span>
-<span id="1414">1414</span>
-<span id="1415">1415</span>
-<span id="1416">1416</span>
-<span id="1417">1417</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Dynomite is the set of high-level interfaces making interacting with [AWS DynamoDB](https://aws.amazon.com/dynamodb/) more productive.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! 💡To learn more about DynamoDB, see [this helpful guide](https://www.dynamodbguide.com/).</span>
@@ -1488,15 +1423,12 @@
 <span class="doccomment">//! #     user: Uuid,</span>
 <span class="doccomment">//! #     order_id: Uuid,</span>
 <span class="doccomment">//! # }</span>
-<span class="doccomment">//! use dynomite::{</span>
-<span class="doccomment">//!     dynamodb::{DynamoDb, GetItemInput},</span>
-<span class="doccomment">//!     Attributes, FromAttributes,</span>
-<span class="doccomment">//! };</span>
+<span class="doccomment">//! use dynomite::{dynamodb::client::Client as DynamoDb, Attributes, FromAttributes};</span>
 <span class="doccomment">//! use std::{convert::TryFrom, error::Error};</span>
 <span class="doccomment">//! use uuid::Uuid;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! async fn get_order(</span>
-<span class="doccomment">//!     client: impl DynamoDb,</span>
+<span class="doccomment">//!     client: &amp;DynamoDb,</span>
 <span class="doccomment">//!     user: Uuid,</span>
 <span class="doccomment">//!     order_id: Uuid,</span>
 <span class="doccomment">//! ) -&gt; Result&lt;Option&lt;Order&gt;, Box&lt;dyn Error&gt;&gt; {</span>
@@ -1506,11 +1438,10 @@
 <span class="doccomment">//!     let key: Attributes = key.into();</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     let result = client</span>
-<span class="doccomment">//!         .get_item(GetItemInput {</span>
-<span class="doccomment">//!             table_name: &quot;orders&quot;.into(),</span>
-<span class="doccomment">//!             key,</span>
-<span class="doccomment">//!             ..Default::default()</span>
-<span class="doccomment">//!         })</span>
+<span class="doccomment">//!         .get_item()</span>
+<span class="doccomment">//!         .table_name(&quot;orders&quot;)</span>
+<span class="doccomment">//!         .set_key(Some(key))</span>
+<span class="doccomment">//!         .send()</span>
 <span class="doccomment">//!         .await?;</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//!     Ok(result</span>
@@ -1768,18 +1699,18 @@
 <span class="comment">// #[cfg(feature = &quot;rustls&quot;)]</span>
 <span class="comment">// pub use rusoto_dynamodb_rustls as dynamodb;</span>
 
-<span class="kw">use</span> <span class="ident">bytes::Bytes</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">aws_sdk_dynamodb</span> <span class="kw">as</span> <span class="ident">dynamodb</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chrono&quot;</span>)]</span>
 <span class="kw">use</span> <span class="ident">chrono</span>::{
     <span class="ident">offset</span>::{<span class="ident">FixedOffset</span>, <span class="ident">Local</span>},
     <span class="ident">DateTime</span>, <span class="ident">Utc</span>,
 };
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">rusoto_dynamodb</span> <span class="kw">as</span> <span class="ident">dynamodb</span>;
 
 <span class="comment">// we re-export this because we</span>
 <span class="comment">// refer to it with in derive macros</span>
+<span class="kw">use</span> <span class="ident">aws_sdk_dynamodb::types::Blob</span>;
 <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dynamodb::AttributeValue</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">dynamodb::model::AttributeValue</span>;
 <span class="kw">use</span> <span class="ident">std</span>::{
     <span class="ident">borrow::Cow</span>,
     <span class="ident">collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">BTreeSet</span>, <span class="ident">HashMap</span>, <span class="ident">HashSet</span>},
@@ -1789,10 +1720,8 @@
 <span class="kw">use</span> <span class="ident">uuid::Uuid</span>;
 
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">error</span>;
-<span class="kw">mod</span> <span class="ident">ext</span>;
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">retry</span>;
-
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ext::DynamoDbExt</span>, <span class="ident">retry::Retries</span>};
+<span class="comment">// mod ext;</span>
+<span class="comment">// pub mod retry;</span>
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::error::AttributeError</span>;
 <span class="doccomment">/// Type alias for map of named attribute values</span>
@@ -1807,7 +1736,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
 <span class="doccomment">/// use dynomite::{</span>
-<span class="doccomment">///     dynamodb::AttributeValue, Attribute, AttributeError, Attributes, FromAttributes,</span>
+<span class="doccomment">///     dynamodb::model::AttributeValue, Attribute, AttributeError, Attributes, FromAttributes,</span>
 <span class="doccomment">///     IntoAttributes, Item,</span>
 <span class="doccomment">/// };</span>
 <span class="doccomment">/// use std::{collections::HashMap, convert::TryFrom};</span>
@@ -1838,8 +1767,13 @@
 <span class="doccomment">///         Ok(Self {</span>
 <span class="doccomment">///             id: attrs</span>
 <span class="doccomment">///                 .remove(&quot;id&quot;)</span>
-<span class="doccomment">///                 .and_then(|val| val.s)</span>
-<span class="doccomment">///                 .ok_or_else(|| AttributeError::MissingField { name: &quot;id&quot;.into() })?,</span>
+<span class="doccomment">///                 .map_or(</span>
+<span class="doccomment">///                     Err(AttributeError::MissingField { name: &quot;id&quot;.into() }),</span>
+<span class="doccomment">///                     |s| Ok(s),</span>
+<span class="doccomment">///                 )?</span>
+<span class="doccomment">///                 .as_s()</span>
+<span class="doccomment">///                 .or(Err(AttributeError::InvalidType))?</span>
+<span class="doccomment">///                 .to_string(),</span>
 <span class="doccomment">///         })</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
@@ -1964,15 +1898,11 @@
 <span class="doccomment">/// # Examples</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ```</span>
-<span class="doccomment">/// use dynomite::{dynamodb::AttributeValue, Attribute};</span>
+<span class="doccomment">/// use dynomite::{dynamodb::model::AttributeValue, Attribute};</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// assert_eq!(</span>
-<span class="doccomment">///     &quot;test&quot;.to_string().into_attr().s,</span>
-<span class="doccomment">///     AttributeValue {</span>
-<span class="doccomment">///         s: Some(&quot;test&quot;.to_string()),</span>
-<span class="doccomment">///         ..AttributeValue::default()</span>
-<span class="doccomment">///     }</span>
-<span class="doccomment">///     .s</span>
+<span class="doccomment">///     &quot;test&quot;.to_string().into_attr(),</span>
+<span class="doccomment">///     AttributeValue::S(&quot;test&quot;.to_string())</span>
 <span class="doccomment">/// );</span>
 <span class="doccomment">/// ```</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Attribute</span>: <span class="ident">Sized</span> {
@@ -2074,13 +2004,15 @@
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">map</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="self">self</span>.<span class="ident">into_attrs</span>(<span class="kw-2">&amp;mut</span> <span class="ident">map</span>);
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">m</span>: <span class="prelude-val">Some</span>(<span class="ident">map</span>),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::M</span>(<span class="ident">map</span>)
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-        <span class="ident">T::from_attrs</span>(<span class="kw-2">&amp;mut</span> <span class="ident">value</span>.<span class="ident">m</span>.<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)<span class="question-mark">?</span>)
+        <span class="ident">T::from_attrs</span>(
+            <span class="kw-2">&amp;mut</span> <span class="ident">value</span>
+                .<span class="ident">as_m</span>()
+                .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))<span class="question-mark">?</span>
+                .<span class="ident">to_owned</span>(),
+        )
     }
 }
 
@@ -2088,15 +2020,13 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;uuid&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">Uuid</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">as_hyphenated</span>().<span class="ident">to_string</span>()),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::S</span>(<span class="self">self</span>.<span class="ident">as_hyphenated</span>().<span class="ident">to_string</span>())
     }
+
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">s</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+            .<span class="ident">as_s</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Uuid::parse_str</span>(<span class="ident">s</span>.<span class="ident">as_str</span>()).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">AttributeError::InvalidFormat</span>))
     }
 }
@@ -2105,17 +2035,14 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chrono&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">to_rfc3339</span>()),
-            ..<span class="ident">Default::default</span>()
-        }
+        <span class="ident">AttributeValue::S</span>(<span class="self">self</span>.<span class="ident">to_rfc3339</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">s</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+            .<span class="ident">as_s</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
             .<span class="ident">and_then</span>(
-                <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">dt</span><span class="op">|</span> <span class="ident">dt</span>.<span class="ident">with_timezone</span>(<span class="kw-2">&amp;</span><span class="ident">Utc</span>)) {
+                <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="ident">s</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">dt</span><span class="op">|</span> <span class="ident">dt</span>.<span class="ident">with_timezone</span>(<span class="kw-2">&amp;</span><span class="ident">Utc</span>)) {
                     <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>),
                     <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidFormat</span>),
                 },
@@ -2127,17 +2054,14 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chrono&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">Local</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">to_rfc3339</span>()),
-            ..<span class="ident">Default::default</span>()
-        }
+        <span class="ident">AttributeValue::S</span>(<span class="self">self</span>.<span class="ident">to_rfc3339</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">s</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+            .<span class="ident">as_s</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
             .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
-                <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">dt</span><span class="op">|</span> <span class="ident">dt</span>.<span class="ident">with_timezone</span>(<span class="kw-2">&amp;</span><span class="ident">Local</span>)) {
+                <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="ident">s</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">dt</span><span class="op">|</span> <span class="ident">dt</span>.<span class="ident">with_timezone</span>(<span class="kw-2">&amp;</span><span class="ident">Local</span>)) {
                     <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>),
                     <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidFormat</span>),
                 }
@@ -2149,16 +2073,13 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chrono&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">DateTime</span><span class="op">&lt;</span><span class="ident">FixedOffset</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">to_rfc3339</span>()),
-            ..<span class="ident">Default::default</span>()
-        }
+        <span class="ident">AttributeValue::S</span>(<span class="self">self</span>.<span class="ident">to_rfc3339</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">s</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>) {
+            .<span class="ident">as_s</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="ident">s</span>) {
                 <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>),
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidFormat</span>),
             })
@@ -2174,9 +2095,9 @@
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">s</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>) {
+            .<span class="ident">as_s</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">DateTime::parse_from_rfc3339</span>(<span class="ident">s</span>) {
                 <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">date_time</span>.<span class="ident">into</span>()),
                 <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidFormat</span>),
             })
@@ -2186,28 +2107,28 @@
 <span class="doccomment">/// A `String` type, represented by the S AttributeValue type</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">String</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::S</span>(<span class="self">self</span>)
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-        <span class="ident">value</span>.<span class="ident">s</span>.<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+        <span class="ident">value</span>
+            .<span class="ident">as_s</span>()
+            .<span class="ident">map</span>(<span class="ident">String::clone</span>)
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">str</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="self">self</span> {
-                <span class="ident">Cow::Owned</span>(<span class="ident">o</span>) =&gt; <span class="ident">o</span>,
-                <span class="ident">Cow::Borrowed</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>.<span class="ident">to_owned</span>(),
-            }),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::S</span>(<span class="kw">match</span> <span class="self">self</span> {
+            <span class="ident">Cow::Owned</span>(<span class="ident">o</span>) =&gt; <span class="ident">o</span>,
+            <span class="ident">Cow::Borrowed</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>.<span class="ident">to_owned</span>(),
+        })
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-        <span class="ident">value</span>.<span class="ident">s</span>.<span class="ident">map</span>(<span class="ident">Cow::Owned</span>).<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+        <span class="ident">value</span>
+            .<span class="ident">as_s</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Cow::Owned</span>(<span class="ident">s</span>.<span class="ident">to_owned</span>()))
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
     }
 }
 
@@ -2215,31 +2136,25 @@
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::implicit_hasher</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">ss</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">drain</span>().<span class="ident">collect</span>()),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::Ss</span>(<span class="self">self</span>.<span class="ident">drain</span>().<span class="ident">collect</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">ss</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">value</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>())
+            .<span class="ident">as_ss</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">to_owned</span>().<span class="ident">drain</span>(..).<span class="ident">collect</span>())
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">ss</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>()),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::Ss</span>(<span class="self">self</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">ss</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">value</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>())
+            .<span class="ident">as_ss</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">to_owned</span>().<span class="ident">drain</span>(..).<span class="ident">collect</span>())
     }
 }
 
@@ -2247,82 +2162,79 @@
 <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::implicit_hasher</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">bs</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">drain</span>().<span class="ident">map</span>(<span class="ident">Bytes::from</span>).<span class="ident">collect</span>()),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::Bs</span>(<span class="self">self</span>.<span class="ident">drain</span>().<span class="ident">map</span>(<span class="ident">Blob::new</span>).<span class="ident">collect</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">bs</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">value</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">drain</span>(..).<span class="ident">map</span>(<span class="op">|</span><span class="ident">bs</span><span class="op">|</span> <span class="ident">bs</span>.<span class="ident">as_ref</span>().<span class="ident">to_vec</span>()).<span class="ident">collect</span>())
+            .<span class="ident">as_bs</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> {
+                <span class="ident">value</span>
+                    .<span class="ident">to_owned</span>()
+                    .<span class="ident">drain</span>(..)
+                    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bs</span><span class="op">|</span> <span class="ident">bs</span>.<span class="ident">as_ref</span>().<span class="ident">to_vec</span>())
+                    .<span class="ident">collect</span>()
+            })
     }
 }
 
 <span class="comment">// a Boolean type, represented by the BOOL AttributeValue type</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">bool</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::Bool</span>(<span class="self">self</span>)
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-        <span class="ident">value</span>.<span class="ident">bool</span>.<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+        <span class="ident">value</span>
+            .<span class="ident">as_bool</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span>)
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
     }
 }
 
 <span class="comment">// a Binary type, represented by the B AttributeValue type</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">bytes::Bytes</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">b</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::B</span>(<span class="ident">Blob::new</span>(<span class="self">self</span>.<span class="ident">as_ref</span>()))
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-        <span class="ident">value</span>.<span class="ident">b</span>.<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+        <span class="ident">value</span>
+            .<span class="ident">as_b</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span>.<span class="ident">to_owned</span>().<span class="ident">into_inner</span>().<span class="ident">into</span>())
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
     }
 }
 
 <span class="comment">// a Binary type, represented by the B AttributeValue type</span>
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">b</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">into</span>()),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::B</span>(<span class="ident">Blob::new</span>(<span class="self">self</span>))
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">b</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bs</span><span class="op">|</span> <span class="ident">bs</span>.<span class="ident">as_ref</span>().<span class="ident">to_vec</span>())
+            .<span class="ident">as_b</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">bs</span><span class="op">|</span> <span class="ident">bs</span>.<span class="ident">to_owned</span>().<span class="ident">into_inner</span>())
     }
 }
 
 <span class="doccomment">/// A List type for vectors, represented by the L AttributeValue type</span>
 <span class="doccomment">///</span>
-<span class="doccomment">/// Note: Vectors support homogenious collection values. This means</span>
+<span class="doccomment">/// Note: Vectors support homogenous collection values. This means</span>
 <span class="doccomment">/// the default supported scalars do not permit cases where you need</span>
-<span class="doccomment">/// to store a list of heterogenus values. To accomplish this you&#39;ll need</span>
+<span class="doccomment">/// to store a list of heterogeneous values. To accomplish this you&#39;ll need</span>
 <span class="doccomment">/// to implement a wrapper type that represents your desired variants</span>
 <span class="doccomment">/// and implement `Attribute` for `YourType`. An `Vec&lt;YourType&gt;` implementation</span>
 <span class="doccomment">/// will already be provided</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">Attribute</span><span class="op">&gt;</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-        <span class="ident">AttributeValue</span> {
-            <span class="ident">l</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">drain</span>(..).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">into_attr</span>()).<span class="ident">collect</span>()),
-            ..<span class="ident">AttributeValue::default</span>()
-        }
+        <span class="ident">AttributeValue::L</span>(<span class="self">self</span>.<span class="ident">drain</span>(..).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">into_attr</span>()).<span class="ident">collect</span>())
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
         <span class="ident">value</span>
-            .<span class="ident">l</span>
-            .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)<span class="question-mark">?</span>
-            .<span class="ident">into_iter</span>()
-            .<span class="ident">map</span>(<span class="ident">Attribute::from_attr</span>)
+            .<span class="ident">as_l</span>()
+            .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))<span class="question-mark">?</span>
+            .<span class="ident">iter</span>()
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">Attribute::from_attr</span>(<span class="ident">x</span>.<span class="ident">to_owned</span>()))
             .<span class="ident">collect</span>()
     }
 }
@@ -2331,15 +2243,12 @@
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="prelude-val">Some</span>(<span class="ident">value</span>) =&gt; <span class="ident">value</span>.<span class="ident">into_attr</span>(),
-            <span class="kw">_</span> =&gt; <span class="ident">AttributeValue</span> {
-                <span class="ident">null</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">Default::default</span>()
-            },
+            <span class="kw">_</span> =&gt; <span class="ident">AttributeValue::Null</span>(<span class="bool-val">true</span>),
         }
     }
     <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">value</span>.<span class="ident">null</span> {
-            <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+        <span class="kw">match</span> <span class="ident">value</span> {
+            <span class="ident">AttributeValue::Null</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
             <span class="kw">_</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Attribute::from_attr</span>(<span class="ident">value</span>)<span class="question-mark">?</span>)),
         }
     }
@@ -2349,15 +2258,12 @@
     (<span class="macro-nonterminal">$</span><span class="kw">type</span>:<span class="macro-nonterminal">ty</span>) =&gt; {
         <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="kw">type</span> {
             <span class="kw">fn</span> <span class="macro-nonterminal">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
-                <span class="ident">AttributeValue</span> {
-                    <span class="ident">n</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">to_string</span>()),
-                    ..<span class="ident">AttributeValue::default</span>()
-                }
+                <span class="ident">AttributeValue::N</span>(<span class="self">self</span>.<span class="ident">to_string</span>())
             }
             <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
                 <span class="ident">value</span>
-                    .<span class="ident">n</span>
-                    .<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)
+                    .<span class="ident">as_n</span>()
+                    .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))
                     .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">num</span><span class="op">|</span> <span class="ident">num</span>.<span class="ident">parse</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">AttributeError::InvalidFormat</span>))
             }
         }
@@ -2369,13 +2275,13 @@
         <span class="doccomment">/// A Number set type, represented by the NS AttributeValue type</span>
         <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">collection</span> {
             <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="kw">crate</span>::AttributeValue</span> {
-                <span class="ident">AttributeValue</span> {
-                    <span class="ident">ns</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>()),
-                    ..<span class="ident">AttributeValue::default</span>()
-                }
+                <span class="ident">AttributeValue::Ns</span>(<span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">item</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>())
             }
             <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">AttributeValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">AttributeError</span><span class="op">&gt;</span> {
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nums</span> <span class="op">=</span> <span class="ident">value</span>.<span class="ident">ns</span>.<span class="ident">ok_or</span>(<span class="ident">AttributeError::InvalidType</span>)<span class="question-mark">?</span>;
+                <span class="kw">let</span> <span class="ident">nums</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">value</span>
+                    .<span class="ident">as_ns</span>()
+                    .<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>))<span class="question-mark">?</span>
+                    .<span class="ident">to_owned</span>();
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">results</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="kw">type</span>, <span class="macro-nonterminal">AttributeError</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">nums</span>
                     .<span class="ident">drain</span>(..)
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">ns</span><span class="op">|</span> <span class="ident">ns</span>.<span class="ident">parse</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">AttributeError::InvalidFormat</span>))
@@ -2430,25 +2336,6 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// A avoid using `&amp;str` slices for values when creating a mapping for a `String` `AttributeValue`.</span>
 <span class="doccomment">/// Instead use a `String`.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ## Example</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// ```</span>
-<span class="doccomment">/// use dynomite::dynamodb::QueryInput;</span>
-<span class="doccomment">/// use dynomite::attr_map;</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// let query = QueryInput {</span>
-<span class="doccomment">///   table_name: &quot;some_table&quot;.into(),</span>
-<span class="doccomment">///   key_condition_expression: Some(</span>
-<span class="doccomment">///     &quot;partitionKeyName = :partitionkeyval&quot;.into()</span>
-<span class="doccomment">///   ),</span>
-<span class="doccomment">///   expression_attribute_values: Some(</span>
-<span class="doccomment">///     attr_map! {</span>
-<span class="doccomment">///        &quot;:partitionkeyval&quot; =&gt; &quot;rust&quot;.to_string()</span>
-<span class="doccomment">///      }</span>
-<span class="doccomment">///    ),</span>
-<span class="doccomment">///    ..QueryInput::default()</span>
-<span class="doccomment">/// };</span>
 <span class="macro">macro_rules!</span> <span class="ident">attr_map</span> {
     (@<span class="ident">single</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; (());
     (@<span class="ident">count</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) =&gt; (<span class="op">&lt;</span>[()]<span class="op">&gt;</span><span class="ident">::len</span>(<span class="kw-2">&amp;</span>[$(<span class="macro-nonterminal">$</span><span class="macro">crate::attr_map!</span>(@<span class="macro-nonterminal">single</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>)),<span class="kw-2">*</span>]));
@@ -2456,7 +2343,7 @@
     ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">key</span>:<span class="ident">expr</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">value</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) =&gt; {
         {
             <span class="kw">let</span> <span class="ident">_cap</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro">crate::attr_map!</span>(@<span class="macro-nonterminal">count</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">key</span>),<span class="kw-2">*</span>);
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_map</span>: <span class="ident">::std::collections::HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::AttributeValue</span><span class="op">&gt;</span> <span class="op">=</span>
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_map</span>: <span class="ident">::std::collections::HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::model::AttributeValue</span><span class="op">&gt;</span> <span class="op">=</span>
               <span class="ident">::std::collections::HashMap::with_capacity</span>(<span class="ident">_cap</span>);
               {
                   <span class="kw">use</span> <span class="ident">::dynomite::Attribute</span>;
@@ -2484,7 +2371,8 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">maplit</span>::{<span class="ident">btreemap</span>, <span class="ident">btreeset</span>, <span class="ident">hashmap</span>};
+    <span class="kw">use</span> <span class="ident">bytes::Bytes</span>;
+    <span class="comment">//use maplit::{btreemap, btreeset, hashmap};</span>
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">uuid_attr</span>() {
@@ -2496,10 +2384,7 @@
     <span class="kw">fn</span> <span class="ident">uuid_invalid_attr</span>() {
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>),
-            <span class="ident">Uuid::from_attr</span>(<span class="ident">AttributeValue</span> {
-                <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">AttributeValue::default</span>()
-            })
+            <span class="ident">Uuid::from_attr</span>(<span class="ident">AttributeValue::Bool</span>(<span class="bool-val">true</span>))
         );
     }
 
@@ -2515,10 +2400,7 @@
     <span class="kw">fn</span> <span class="ident">chrono_datetime_invalid_utc_attr</span>() {
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>),
-            <span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue</span> {
-                <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">AttributeValue::default</span>()
-            })
+            <span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">Utc</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue::Bool</span>(<span class="bool-val">true</span>))
         );
     }
 
@@ -2534,10 +2416,7 @@
     <span class="kw">fn</span> <span class="ident">chrono_datetime_invalid_local_attr</span>() {
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>),
-            <span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">Local</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue</span> {
-                <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">AttributeValue::default</span>()
-            })
+            <span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">Local</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue::Bool</span>(<span class="bool-val">true</span>))
         );
     }
 
@@ -2559,10 +2438,7 @@
     <span class="kw">fn</span> <span class="ident">chrono_datetime_invalid_fixedoffset_attr</span>() {
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>),
-            <span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">FixedOffset</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue</span> {
-                <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">AttributeValue::default</span>()
-            })
+            <span class="ident">DateTime</span>::<span class="op">&lt;</span><span class="ident">FixedOffset</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue::Bool</span>(<span class="bool-val">true</span>))
         );
     }
 
@@ -2580,16 +2456,13 @@
         <span class="kw">use</span> <span class="ident">std::time::SystemTime</span>;
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>),
-            <span class="ident">SystemTime::from_attr</span>(<span class="ident">AttributeValue</span> {
-                <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">AttributeValue::default</span>()
-            })
+            <span class="ident">SystemTime::from_attr</span>(<span class="ident">AttributeValue::Bool</span>(<span class="bool-val">true</span>))
         );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">option_some_attr</span>() {
-        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="number">1</span>);
+        <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="number">1u32</span>);
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="ident">value</span>), <span class="ident">Attribute::from_attr</span>(<span class="ident">value</span>.<span class="ident">into_attr</span>()));
     }
 
@@ -2603,10 +2476,7 @@
     <span class="kw">fn</span> <span class="ident">option_invalid_attr</span>() {
         <span class="macro">assert_eq!</span>(
             <span class="prelude-val">Err</span>(<span class="ident">AttributeError::InvalidType</span>),
-            <span class="prelude-ty">Option</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue</span> {
-                <span class="ident">bool</span>: <span class="prelude-val">Some</span>(<span class="bool-val">true</span>),
-                ..<span class="ident">AttributeValue::default</span>()
-            })
+            <span class="prelude-ty">Option</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">AttributeValue::Bool</span>(<span class="bool-val">true</span>))
         );
     }
 
@@ -2634,208 +2504,208 @@
         <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="ident">value</span>.<span class="ident">clone</span>()), <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="ident">::from_attr</span>(<span class="ident">value</span>.<span class="ident">into_attr</span>()));
     }
 
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">numeric_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="number">1</span>.<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;N&quot;:&quot;1&quot;}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">numeric_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(<span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;N&quot;:&quot;1&quot;}&quot;#</span>).<span class="ident">unwrap</span>()),
-            <span class="prelude-val">Ok</span>(<span class="number">1</span>)
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">string_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>().<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">string_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(<span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#</span>).<span class="ident">unwrap</span>()),
-            <span class="prelude-val">Ok</span>(<span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>())
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">cow_str_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">Cow::Borrowed</span>(<span class="string">&quot;foo&quot;</span>).<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">cow_str_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(<span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#</span>).<span class="ident">unwrap</span>()),
-            <span class="prelude-val">Ok</span>(<span class="ident">Cow::Borrowed</span>(<span class="string">&quot;foo&quot;</span>))
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">byte_vec_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="string">b&quot;foo&quot;</span>.<span class="ident">to_vec</span>().<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;#</span> <span class="comment">// ruosoto converts to base64 for us</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">byte_vec_from_attr</span>() {
-        <span class="comment">// ruosoto converts to base64 for us</span>
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;#</span>).<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="string">b&quot;foo&quot;</span>.<span class="ident">to_vec</span>())
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bytes_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">Bytes::from</span>(<span class="string">&quot;foo&quot;</span>).<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;#</span> <span class="comment">// ruosoto converts to base64 for us</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bytes_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;#</span>).<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="ident">Bytes::from</span>(<span class="string">&quot;foo&quot;</span>))
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">numeric_set_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="macro">btreeset!</span> { <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span> }.<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;NS&quot;:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">numeric_set_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;NS&quot;:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]}&quot;#</span>).<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="macro">btreeset!</span> { <span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span> })
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">numeric_vec_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>].<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;L&quot;:[{&quot;N&quot;:&quot;1&quot;},{&quot;N&quot;:&quot;2&quot;},{&quot;N&quot;:&quot;3&quot;},{&quot;N&quot;:&quot;3&quot;}]}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">numeric_vec_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(
-                    <span class="string">r#&quot;{&quot;L&quot;:[{&quot;N&quot;:&quot;1&quot;},{&quot;N&quot;:&quot;2&quot;},{&quot;N&quot;:&quot;3&quot;},{&quot;N&quot;:&quot;3&quot;}]}&quot;#</span>
-                )
-                .<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>])
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">string_set_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(
-                <span class="kw-2">&amp;</span><span class="macro">btreeset!</span> { <span class="string">&quot;a&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;b&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;c&quot;</span>.<span class="ident">to_string</span>() }.<span class="ident">into_attr</span>()
-            )
-            .<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;SS&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">string_set_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;SS&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]}&quot;#</span>).<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="macro">btreeset!</span> { <span class="string">&quot;a&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;b&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;c&quot;</span>.<span class="ident">to_string</span>() })
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">string_vec_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(
-                <span class="kw-2">&amp;</span><span class="macro">vec!</span> { <span class="string">&quot;a&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;b&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;c&quot;</span>.<span class="ident">to_string</span>() }.<span class="ident">into_attr</span>()
-            )
-            .<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;L&quot;:[{&quot;S&quot;:&quot;a&quot;},{&quot;S&quot;:&quot;b&quot;},{&quot;S&quot;:&quot;c&quot;}]}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">string_vec_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;L&quot;:[{&quot;S&quot;:&quot;a&quot;},{&quot;S&quot;:&quot;b&quot;},{&quot;S&quot;:&quot;c&quot;}]}&quot;#</span>)
-                    .<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="macro">vec!</span> { <span class="string">&quot;a&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;b&quot;</span>.<span class="ident">to_string</span>(), <span class="string">&quot;c&quot;</span>.<span class="ident">to_string</span>() })
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hashmap_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="macro">hashmap!</span> { <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() =&gt; <span class="number">1</span> }.<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">hashmap_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#</span>).<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="macro">hashmap!</span> { <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() =&gt; <span class="number">1</span> })
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">btreemap_into_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="macro">btreemap!</span> { <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() =&gt; <span class="number">1</span> }.<span class="ident">into_attr</span>()).<span class="ident">unwrap</span>(),
-            <span class="string">r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">btreemap_from_attr</span>() {
-        <span class="macro">assert_eq!</span>(
-            <span class="ident">Attribute::from_attr</span>(
-                <span class="ident">serde_json::from_str</span>::<span class="op">&lt;</span><span class="ident">AttributeValue</span><span class="op">&gt;</span>(<span class="string">r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#</span>).<span class="ident">unwrap</span>()
-            ),
-            <span class="prelude-val">Ok</span>(<span class="macro">btreemap!</span> { <span class="string">&quot;foo&quot;</span>.<span class="ident">to_string</span>() =&gt; <span class="number">1</span> })
-        );
-    }
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn numeric_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;1u32.into_attr() ).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;N&quot;:&quot;1&quot;}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn numeric_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;N&quot;:&quot;1&quot;}&quot;#).unwrap()),</span>
+    <span class="comment">//         Ok(1u32)</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn string_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;&quot;foo&quot;.to_string().into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn string_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#).unwrap()),</span>
+    <span class="comment">//         Ok(&quot;foo&quot;.to_string())</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn cow_str_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;Cow::Borrowed(&quot;foo&quot;).into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn cow_str_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;S&quot;:&quot;foo&quot;}&quot;#).unwrap()),</span>
+    <span class="comment">//         Ok(Cow::Borrowed(&quot;foo&quot;))</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn byte_vec_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;b&quot;foo&quot;.to_vec().into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;# // ruosoto converts to base64 for us</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn byte_vec_from_attr() {</span>
+    <span class="comment">//     // ruosoto converts to base64 for us</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;#).unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(b&quot;foo&quot;.to_vec())</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn bytes_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;Bytes::from(&quot;foo&quot;).into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;# // ruosoto converts to base64 for us</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn bytes_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;B&quot;:&quot;Zm9v&quot;}&quot;#).unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(Bytes::from(&quot;foo&quot;))</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn numeric_set_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;btreeset! { 1u32,2,3 }.into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;NS&quot;:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn numeric_set_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;NS&quot;:[&quot;1&quot;,&quot;2&quot;,&quot;3&quot;]}&quot;#).unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(btreeset! { 1u32,2,3 })</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn numeric_vec_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;vec![1, 2, 3, 3].into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;L&quot;:[{&quot;N&quot;:&quot;1&quot;},{&quot;N&quot;:&quot;2&quot;},{&quot;N&quot;:&quot;3&quot;},{&quot;N&quot;:&quot;3&quot;}]}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn numeric_vec_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(</span>
+    <span class="comment">//                 r#&quot;{&quot;L&quot;:[{&quot;N&quot;:&quot;1&quot;},{&quot;N&quot;:&quot;2&quot;},{&quot;N&quot;:&quot;3&quot;},{&quot;N&quot;:&quot;3&quot;}]}&quot;#</span>
+    <span class="comment">//             )</span>
+    <span class="comment">//             .unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(vec![1, 2, 3, 3])</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn string_set_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(</span>
+    <span class="comment">//             &amp;btreeset! { &quot;a&quot;.to_string(), &quot;b&quot;.to_string(), &quot;c&quot;.to_string() }.into_attr()</span>
+    <span class="comment">//         )</span>
+    <span class="comment">//         .unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;SS&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn string_set_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;SS&quot;:[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;]}&quot;#).unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(btreeset! { &quot;a&quot;.to_string(), &quot;b&quot;.to_string(), &quot;c&quot;.to_string() })</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn string_vec_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(</span>
+    <span class="comment">//             &amp;vec! { &quot;a&quot;.to_string(), &quot;b&quot;.to_string(), &quot;c&quot;.to_string() }.into_attr()</span>
+    <span class="comment">//         )</span>
+    <span class="comment">//         .unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;L&quot;:[{&quot;S&quot;:&quot;a&quot;},{&quot;S&quot;:&quot;b&quot;},{&quot;S&quot;:&quot;c&quot;}]}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn string_vec_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;L&quot;:[{&quot;S&quot;:&quot;a&quot;},{&quot;S&quot;:&quot;b&quot;},{&quot;S&quot;:&quot;c&quot;}]}&quot;#)</span>
+    <span class="comment">//                 .unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(vec! { &quot;a&quot;.to_string(), &quot;b&quot;.to_string(), &quot;c&quot;.to_string() })</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn hashmap_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;hashmap! { &quot;foo&quot;.to_string() =&gt; 1u32 }.into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn hashmap_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#).unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(hashmap! { &quot;foo&quot;.to_string() =&gt; 1u32 })</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn btreemap_into_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         serde_json::to_string(&amp;btreemap! { &quot;foo&quot;.to_string() =&gt; 1u32 }.into_attr()).unwrap(),</span>
+    <span class="comment">//         r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
+    <span class="comment">//</span>
+    <span class="comment">// #[test]</span>
+    <span class="comment">// fn btreemap_from_attr() {</span>
+    <span class="comment">//     assert_eq!(</span>
+    <span class="comment">//         Attribute::from_attr(</span>
+    <span class="comment">//             serde_json::from_str::&lt;AttributeValue&gt;(r#&quot;{&quot;M&quot;:{&quot;foo&quot;:{&quot;N&quot;:&quot;1&quot;}}}&quot;#).unwrap()</span>
+    <span class="comment">//         ),</span>
+    <span class="comment">//         Ok(btreemap! { &quot;foo&quot;.to_string() =&gt; 1u32 })</span>
+    <span class="comment">//     );</span>
+    <span class="comment">// }</span>
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="dynomite" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.60.0 (7737e0b5c 2022-04-04)" ></div>

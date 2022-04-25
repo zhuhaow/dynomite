@@ -4,7 +4,7 @@
     </nav>
     <nav class="sidebar"><a class="sidebar-logo" href="../dynomite/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
         </a><h2 class="location"><a href="#">Crate dynomite</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.10.0</li><li><a id="all-types" href="all.html">All Items</a></li></div></ul><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#macros">Macros</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div></section><div id="sidebar-vars" data-name="dynomite" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../dynomite/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
-    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">dynomite</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/dynomite/lib.rs.html#1-1417">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Dynomite is the set of high-level interfaces making interacting with <a href="https://aws.amazon.com/dynamodb/">AWS DynamoDB</a> more productive.</p>
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">dynomite</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/dynomite/lib.rs.html#1-1352">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Dynomite is the set of high-level interfaces making interacting with <a href="https://aws.amazon.com/dynamodb/">AWS DynamoDB</a> more productive.</p>
 <p>💡To learn more about DynamoDB, see <a href="https://www.dynamodbguide.com/">this helpful guide</a>.</p>
 <h3 id="data-modeling"><a href="#data-modeling">Data Modeling</a></h3>
 <p>Dynomite adapts Rust’s native types to
@@ -46,15 +46,12 @@ struct like this:</p>
 }</code></pre></div>
 <p>Use it to safely and conveniently construct the primary key:</p>
 
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">dynomite</span>::{
-    <span class="ident">dynamodb</span>::{<span class="ident">DynamoDb</span>, <span class="ident">GetItemInput</span>},
-    <span class="ident">Attributes</span>, <span class="ident">FromAttributes</span>,
-};
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">dynomite</span>::{<span class="ident">dynamodb::client::Client</span> <span class="kw">as</span> <span class="ident">DynamoDb</span>, <span class="ident">Attributes</span>, <span class="ident">FromAttributes</span>};
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">convert::TryFrom</span>, <span class="ident">error::Error</span>};
 <span class="kw">use</span> <span class="ident">uuid::Uuid</span>;
 
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_order</span>(
-    <span class="ident">client</span>: <span class="kw">impl</span> <span class="ident">DynamoDb</span>,
+    <span class="ident">client</span>: <span class="kw-2">&amp;</span><span class="ident">DynamoDb</span>,
     <span class="ident">user</span>: <span class="ident">Uuid</span>,
     <span class="ident">order_id</span>: <span class="ident">Uuid</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Order</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
@@ -64,11 +61,10 @@ struct like this:</p>
     <span class="kw">let</span> <span class="ident">key</span>: <span class="ident">Attributes</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">into</span>();
 
     <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">client</span>
-        .<span class="ident">get_item</span>(<span class="ident">GetItemInput</span> {
-            <span class="ident">table_name</span>: <span class="string">&quot;orders&quot;</span>.<span class="ident">into</span>(),
-            <span class="ident">key</span>,
-            ..<span class="ident">Default::default</span>()
-        })
+        .<span class="ident">get_item</span>()
+        .<span class="ident">table_name</span>(<span class="string">&quot;orders&quot;</span>)
+        .<span class="ident">set_key</span>(<span class="prelude-val">Some</span>(<span class="ident">key</span>))
+        .<span class="ident">send</span>()
         .<span class="kw">await</span><span class="question-mark">?</span>;
 
     <span class="prelude-val">Ok</span>(<span class="ident">result</span>
@@ -264,14 +260,12 @@ enable this feature. It will also enable <code>uuid</code> and <code>derive</cod
 version = &quot;xxx&quot;
 default-features = false
 features = [&quot;feature-you-want&quot;]</code></pre></div></div></details><h2 id="reexports" class="small-section-header"><a href="#reexports">Re-exports</a></h2>
-<div class="item-table"><div class="item-row"><div class="item-left import-item"><code>pub use rusoto_dynamodb as dynamodb;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use crate::retry::<a class="trait" href="retry/trait.Retries.html" title="trait dynomite::retry::Retries">Retries</a>;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use crate::error::<a class="enum" href="error/enum.AttributeError.html" title="enum dynomite::error::AttributeError">AttributeError</a>;</code></div><div class="item-right docblock-short"></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left import-item"><code>pub use aws_sdk_dynamodb as dynamodb;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use crate::error::<a class="enum" href="error/enum.AttributeError.html" title="enum dynomite::error::AttributeError">AttributeError</a>;</code></div><div class="item-right docblock-short"></div></div></div><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="error/index.html" title="dynomite::error mod">error</a></div><div class="item-right docblock-short"><p>Dynomite error types</p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="retry/index.html" title="dynomite::retry mod">retry</a></div><div class="item-right docblock-short"><p>Retry functionality</p>
 </div></div></div><h2 id="macros" class="small-section-header"><a href="#macros">Macros</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="macro" href="macro.attr_map.html" title="dynomite::attr_map macro">attr_map</a></div><div class="item-right docblock-short"><p>Creates a <code>HashMap&lt;String, AttributeValue&gt;</code> from a list of key-value pairs</p>
 </div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Attribute.html" title="dynomite::Attribute trait">Attribute</a></div><div class="item-right docblock-short"><p>A type capable of being converted into an or from and AWS <code>AttributeValue</code></p>
-</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.DynamoDbExt.html" title="dynomite::DynamoDbExt trait">DynamoDbExt</a></div><div class="item-right docblock-short"><p>Extension methods for DynamoDb client types</p>
 </div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.FromAttributes.html" title="dynomite::FromAttributes trait">FromAttributes</a></div><div class="item-right docblock-short"><p>A type capable of being produced from a set of string keys and <a href="https://docs.rs/rusoto_dynamodb/*/rusoto_dynamodb/struct.AttributeValue.html"><code>AttributeValue</code></a>s.
 Generally, you should not implement this trait manually.
 Use <code>#[derive(Attributes/Item)]</code> to generate the proper implementation instead.</p>

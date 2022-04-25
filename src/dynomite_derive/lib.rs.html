@@ -831,7 +831,6 @@
 <span id="826">826</span>
 <span id="827">827</span>
 <span id="828">828</span>
-<span id="829">829</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Provides procedural macros for deriving dynomite types for your structs and enum types</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
@@ -1183,16 +1182,16 @@
 
 <span class="doccomment">/// ```rust,ignore</span>
 <span class="doccomment">/// impl ::dynomite::Attribute for Name {</span>
-<span class="doccomment">///   fn into_attr(self) -&gt; ::dynomite::dynamodb::AttributeValue {</span>
+<span class="doccomment">///   fn into_attr(self) -&gt; ::dynomite::dynamodb::model::AttributeValue {</span>
 <span class="doccomment">///     let arm = match self {</span>
 <span class="doccomment">///        Name::Variant =&gt; &quot;Variant&quot;.to_string()</span>
 <span class="doccomment">///     };</span>
-<span class="doccomment">///     ::dynomite::dynamodb::AttributeValue {</span>
+<span class="doccomment">///     ::dynomite::dynamodb::model::AttributeValue {</span>
 <span class="doccomment">///        s: Some(arm),</span>
 <span class="doccomment">///        ..Default::default()</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">///   }</span>
-<span class="doccomment">///   fn from_attr(value: ::dynomite::dynamodb::AttributeValue) -&gt; Result&lt;Self, ::dynomite::AttributeError&gt; {</span>
+<span class="doccomment">///   fn from_attr(value: ::dynomite::dynamodb::model::AttributeValue) -&gt; Result&lt;Self, ::dynomite::AttributeError&gt; {</span>
 <span class="doccomment">///     value.s.ok_or(::dynomite::AttributeError::InvalidType)</span>
 <span class="doccomment">///       .and_then(|value| match &amp;value[..] {</span>
 <span class="doccomment">///          &quot;Variant&quot; =&gt; Ok(Name::Variant),</span>
@@ -1222,17 +1221,16 @@
 
     <span class="macro">quote!</span> {
         <span class="kw">impl</span> #<span class="ident">attr</span> <span class="kw">for</span> #<span class="ident">name</span> {
-            <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">::dynomite::dynamodb::AttributeValue</span> {
+            <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">::dynomite::dynamodb::model::AttributeValue</span> {
                 <span class="kw">let</span> <span class="ident">arm</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
                     #(#<span class="ident">into_match_arms</span>)<span class="op">*</span>
                 };
-                <span class="ident">::dynomite::dynamodb::AttributeValue</span> {
-                    <span class="ident">s</span>: <span class="ident">::std::option::Option::Some</span>(<span class="ident">arm</span>),
-                    ..<span class="ident">::std::default::Default::default</span>()
-                }
+                <span class="ident">::dynomite::dynamodb::model::AttributeValue::S</span>(
+                    <span class="ident">arm</span>
+                )
             }
-            <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">::dynomite::dynamodb::AttributeValue</span>) -&gt; <span class="ident">::std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, #<span class="ident">err</span><span class="op">&gt;</span> {
-                <span class="ident">value</span>.<span class="ident">s</span>.<span class="ident">ok_or</span>(<span class="ident">::dynomite::AttributeError::InvalidType</span>)
+            <span class="kw">fn</span> <span class="ident">from_attr</span>(<span class="ident">value</span>: <span class="ident">::dynomite::dynamodb::model::AttributeValue</span>) -&gt; <span class="ident">::std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, #<span class="ident">err</span><span class="op">&gt;</span> {
+                <span class="ident">value</span>.<span class="ident">as_s</span>().<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">::dynomite::AttributeError::InvalidType</span>))
                     .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">value</span>[..] {
                         #(#<span class="ident">from_match_arms</span>)<span class="op">*</span>
                         <span class="kw">_</span> =&gt; <span class="ident">::std::result::Result::Err</span>(<span class="ident">::dynomite::AttributeError::InvalidFormat</span>)
@@ -1518,7 +1516,7 @@
 
 <span class="doccomment">/// ```rust,ignore</span>
 <span class="doccomment">/// impl ::dynomite::Item for Name {</span>
-<span class="doccomment">///   fn key(&amp;self) -&gt; ::std::collections::HashMap&lt;String, ::dynomite::dynamodb::AttributeValue&gt; {</span>
+<span class="doccomment">///   fn key(&amp;self) -&gt; ::std::collections::HashMap&lt;String, ::dynomite::dynamodb::model::AttributeValue&gt; {</span>
 <span class="doccomment">///     let mut keys = ::std::collections::HashMap::new();</span>
 <span class="doccomment">///     keys.insert(&quot;field_deser_name&quot;, to_attribute_value(field));</span>
 <span class="doccomment">///     keys</span>
@@ -1531,7 +1529,7 @@
 ) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">ToTokens</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="macro">quote!</span>(<span class="ident">::dynomite::Item</span>);
     <span class="kw">let</span> <span class="ident">attribute_map</span> <span class="op">=</span> <span class="macro">quote!</span>(
-        <span class="ident">::std::collections::HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::AttributeValue</span><span class="op">&gt;</span>
+        <span class="ident">::std::collections::HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::model::AttributeValue</span><span class="op">&gt;</span>
     );
     <span class="kw">let</span> <span class="ident">partition_key_field</span> <span class="op">=</span> <span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">is_partition_key</span>());
     <span class="kw">let</span> <span class="ident">sort_key_field</span> <span class="op">=</span> <span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">is_sort_key</span>());
@@ -1555,11 +1553,11 @@
                         <span class="ident">keys</span>
                     }
 
-                    <span class="kw">fn</span> <span class="ident">partition_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::AttributeValue</span>) {
+                    <span class="kw">fn</span> <span class="ident">partition_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::model::AttributeValue</span>) {
                         #<span class="ident">partition_key_tuple</span>
                     }
 
-                    <span class="kw">fn</span> <span class="ident">sort_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::AttributeValue</span>)<span class="op">&gt;</span> {
+                    <span class="kw">fn</span> <span class="ident">sort_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">::dynomite::dynamodb::model::AttributeValue</span>)<span class="op">&gt;</span> {
                         #<span class="ident">sort_key_tuple</span>
                     }
                 }
