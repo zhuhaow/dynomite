@@ -349,16 +349,16 @@ fn expand_attribute(ast: DeriveInput) -> impl ToTokens {
 
 /// ```rust,ignore
 /// impl ::dynomite::Attribute for Name {
-///   fn into_attr(self) -> ::dynomite::dynamodb::AttributeValue {
+///   fn into_attr(self) -> ::dynomite::dynamodb::model::AttributeValue {
 ///     let arm = match self {
 ///        Name::Variant => "Variant".to_string()
 ///     };
-///     ::dynomite::dynamodb::AttributeValue {
+///     ::dynomite::dynamodb::model::AttributeValue {
 ///        s: Some(arm),
 ///        ..Default::default()
 ///     }
 ///   }
-///   fn from_attr(value: ::dynomite::dynamodb::AttributeValue) -> Result<Self, ::dynomite::AttributeError> {
+///   fn from_attr(value: ::dynomite::dynamodb::model::AttributeValue) -> Result<Self, ::dynomite::AttributeError> {
 ///     value.s.ok_or(::dynomite::AttributeError::InvalidType)
 ///       .and_then(|value| match &value[..] {
 ///          "Variant" => Ok(Name::Variant),
@@ -388,17 +388,16 @@ fn make_dynomite_attr(
 
     quote! {
         impl #attr for #name {
-            fn into_attr(self) -> ::dynomite::dynamodb::AttributeValue {
+            fn into_attr(self) -> ::dynomite::dynamodb::model::AttributeValue {
                 let arm = match self {
                     #(#into_match_arms)*
                 };
-                ::dynomite::dynamodb::AttributeValue {
-                    s: ::std::option::Option::Some(arm),
-                    ..::std::default::Default::default()
-                }
+                ::dynomite::dynamodb::model::AttributeValue::S(
+                    arm
+                )
             }
-            fn from_attr(value: ::dynomite::dynamodb::AttributeValue) -> ::std::result::Result<Self, #err> {
-                value.s.ok_or(::dynomite::AttributeError::InvalidType)
+            fn from_attr(value: ::dynomite::dynamodb::model::AttributeValue) -> ::std::result::Result<Self, #err> {
+                value.as_s().or(Err(::dynomite::AttributeError::InvalidType))
                     .and_then(|value| match &value[..] {
                         #(#from_match_arms)*
                         _ => ::std::result::Result::Err(::dynomite::AttributeError::InvalidFormat)
@@ -684,7 +683,7 @@ fn get_item_impls(
 
 /// ```rust,ignore
 /// impl ::dynomite::Item for Name {
-///   fn key(&self) -> ::std::collections::HashMap<String, ::dynomite::dynamodb::AttributeValue> {
+///   fn key(&self) -> ::std::collections::HashMap<String, ::dynomite::dynamodb::model::AttributeValue> {
 ///     let mut keys = ::std::collections::HashMap::new();
 ///     keys.insert("field_deser_name", to_attribute_value(field));
 ///     keys
@@ -697,7 +696,7 @@ fn get_item_trait(
 ) -> syn::Result<impl ToTokens> {
     let item = quote!(::dynomite::Item);
     let attribute_map = quote!(
-        ::std::collections::HashMap<String, ::dynomite::dynamodb::AttributeValue>
+        ::std::collections::HashMap<String, ::dynomite::dynamodb::model::AttributeValue>
     );
     let partition_key_field = fields.iter().find(|f| f.is_partition_key());
     let sort_key_field = fields.iter().find(|f| f.is_sort_key());
@@ -721,11 +720,11 @@ fn get_item_trait(
                         keys
                     }
 
-                    fn partition_key(&self) -> (String, ::dynomite::dynamodb::AttributeValue) {
+                    fn partition_key(&self) -> (String, ::dynomite::dynamodb::model::AttributeValue) {
                         #partition_key_tuple
                     }
 
-                    fn sort_key(&self) -> Option<(String, ::dynomite::dynamodb::AttributeValue)> {
+                    fn sort_key(&self) -> Option<(String, ::dynomite::dynamodb::model::AttributeValue)> {
                         #sort_key_tuple
                     }
                 }
