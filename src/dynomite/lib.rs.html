@@ -2089,7 +2089,7 @@
 <span class="kw">impl</span> <span class="ident">Attribute</span> <span class="kw">for</span> <span class="ident">Uuid</span> {
     <span class="kw">fn</span> <span class="ident">into_attr</span>(<span class="self">self</span>) -&gt; <span class="ident">AttributeValue</span> {
         <span class="ident">AttributeValue</span> {
-            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">to_hyphenated</span>().<span class="ident">to_string</span>()),
+            <span class="ident">s</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">as_hyphenated</span>().<span class="ident">to_string</span>()),
             ..<span class="ident">AttributeValue::default</span>()
         }
     }
