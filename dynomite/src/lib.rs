@@ -22,16 +22,16 @@
 //!
 //!
 //! ```rust,no_run
-//!  use dynomite::{Item, Attributes};
-//!  use uuid::Uuid;
+//! use dynomite::{Attributes, Item};
+//! use uuid::Uuid;
 //!
 //! #[derive(Item)]
 //! struct Order {
-//!   #[dynomite(partition_key)]
-//!   user: Uuid,
-//!   #[dynomite(sort_key)]
-//!   order_id: Uuid,
-//!   color: Option<String>,
+//!     #[dynomite(partition_key)]
+//!     user: Uuid,
+//!     #[dynomite(sort_key)]
+//!     order_id: Uuid,
+//!     color: Option<String>,
 //! }
 //! ```
 //!

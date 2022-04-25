@@ -5,16 +5,17 @@
 //!
 //! # examples
 //! ```rust,no_run
-//!  use dynomite::{Retries, retry::Policy};
-//!  use dynomite::dynamodb::{DynamoDb, DynamoDbClient};
+//! use dynomite::{
+//!     dynamodb::{DynamoDb, DynamoDbClient},
+//!     retry::Policy,
+//!     Retries,
+//! };
 //!
-//!  let client =
-//!     DynamoDbClient::new(Default::default())
-//!         .with_retries(Policy::default());
+//! let client = DynamoDbClient::new(Default::default()).with_retries(Policy::default());
 //!
-//!  // any client operation will now be retried when
-//!  // appropriate
-//!  let tables = client.list_tables(Default::default());
+//! // any client operation will now be retried when
+//! // appropriate
+//! let tables = client.list_tables(Default::default());
 //! ```
 
 use crate::dynamodb::*;
