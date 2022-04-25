@@ -43,9 +43,9 @@ impl Default for Policy {
     }
 }
 
-impl Into<RetryPolicy> for Policy {
-    fn into(self) -> RetryPolicy {
-        match self {
+impl From<Policy> for RetryPolicy {
+    fn from(policy: Policy) -> Self {
+        match policy {
             Policy::Limit(times) => RetryPolicy::default()
                 .with_max_retries(times)
                 .with_jitter(true),
