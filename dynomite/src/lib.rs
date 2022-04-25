@@ -351,7 +351,7 @@ use chrono::{
 
 // we re-export this because we
 // refer to it with in derive macros
-use aws_sdk_dynamodb::Blob;
+use aws_sdk_dynamodb::types::Blob;
 #[doc(hidden)]
 pub use dynamodb::model::AttributeValue;
 use std::{
@@ -663,11 +663,9 @@ impl<T: IntoAttributes + FromAttributes> Attribute for T {
 #[cfg(feature = "uuid")]
 impl Attribute for Uuid {
     fn into_attr(self) -> AttributeValue {
-        AttributeValue {
-            s: Some(self.as_hyphenated().to_string()),
-            ..AttributeValue::default()
-        }
+        AttributeValue::S(self.as_hyphenated().to_string())
     }
+
     fn from_attr(value: AttributeValue) -> Result<Self, AttributeError> {
         value
             .as_s()
